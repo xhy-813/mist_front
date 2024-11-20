@@ -6,7 +6,7 @@ meta:
 <template>
   <div>
     <PageMain>
-      多级导航2-1
+      线性分类
     </PageMain>
   </div>
 </template>

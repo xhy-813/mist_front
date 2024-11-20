@@ -28,7 +28,7 @@ export default defineFakeRoute([
                   {
                     path: 'page',
                     name: 'multilevelMenuExample1',
-                    component: 'multilevel_menu_example/page.vue',
+                    component: 'multilevel_menu_example/linear_classification.vue',
                     meta: {
                       title: '导航1',
                     },
@@ -44,7 +44,7 @@ export default defineFakeRoute([
                       {
                         path: 'page',
                         name: 'multilevelMenuExample2-1',
-                        component: 'multilevel_menu_example/level2/page.vue',
+                        component: 'multilevel_menu_example/level2/linear_classification.vue',
                         meta: {
                           title: '导航2-1',
                         },
