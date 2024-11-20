@@ -37,9 +37,11 @@ import { UploadFilled } from '@element-plus/icons-vue'
 import api from "@/api";
 import {ElMessage} from "element-plus";
 
-const success = () =>{
+const file_name = ref('1')
+
+const success = (name) =>{
   ElMessage({
-    message:'文件上传成功',
+    message:`${name}文件上传成功`,
     type:'success'
   })
 }
@@ -56,7 +58,8 @@ const uploadFile = (options: any) => {
     }
   })
     .then(response => {
-      success()
+      file_name.value = response.data.upload_data
+      success(file_name.value)
       // 可以在这里处理成功后的逻辑，比如显示成功提示
     })
 
