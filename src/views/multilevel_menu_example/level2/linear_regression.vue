@@ -29,6 +29,14 @@ title: 导航2-1
           </div>
         </template>
       </el-upload>
+<!--原来做测试用的按钮-->
+<!--      <div>-->
+<!--        <el-button type="primary" @click="">pictureTest</el-button>-->
+<!--        <el-image :src='test'/>-->
+<!--      </div>-->
+      <div>
+        <el-image :src="linregress_img"/>
+      </div>
     </PageMain>
   </div>
 </template>
@@ -38,6 +46,7 @@ import api from "@/api";
 import {ElMessage} from "element-plus";
 
 const file_name = ref('1')
+const linregress_img = ref('')
 
 const success = (name) =>{
   ElMessage({
@@ -52,6 +61,7 @@ const uploadFile = (options: any) => {
   const formData = new FormData()
   formData.append('file', file)
 
+  // 这里其实最好做成异步处理 因为图片上传 和后端图片返回响应是两步操作 但是暂时偷懒没做那么全
   api.post('/linear/regression', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
@@ -60,6 +70,9 @@ const uploadFile = (options: any) => {
     .then(response => {
       file_name.value = response.data.upload_data
       success(file_name.value)
+
+      linregress_img.value = response.data.img_data
+
       // 可以在这里处理成功后的逻辑，比如显示成功提示
     })
 
@@ -70,5 +83,14 @@ const uploadFile = (options: any) => {
       // 可以在这里处理失败后的逻辑，比如显示错误提示
     })
 }
+
+// 图片测试
+// const pictureTest = () => {
+//   api.get('/pictureTest')
+//     .then(response => {
+//       console.log(response)
+//       test.value =response.data.upload_data
+//     })
+// }
 
 </script>

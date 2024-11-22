@@ -5,8 +5,8 @@ meta:
 
 <template>
   <div>
-    <PageMain>
+    <PageHeader>
       线性分类
-    </PageMain>
+    </PageHeader>
   </div>
 </template>
