@@ -14,9 +14,12 @@ title: 导航2-1
 <!--      拖入文件上传部分 (有爆红但是代码没问题)-->
       <el-upload
         class="upload-demo"
+        :limit= '1'
         drag
         action=""
         :http-request = "uploadFile"
+        :on-exceed="handleExceed"
+        :on-remove="set_zero"
         multiple
       >
         <el-icon class="el-icon--upload"><upload-filled /></el-icon>
@@ -25,15 +28,12 @@ title: 导航2-1
         </div>
         <template #tip>
           <div class="el-upload__tip">
-            jpg/png files with a size less than 500kb
+            仅支持xls和xlsx文件类型哦
           </div>
         </template>
       </el-upload>
-<!--原来做测试用的按钮-->
-<!--      <div>-->
-<!--        <el-button type="primary" @click="">pictureTest</el-button>-->
-<!--        <el-image :src='test'/>-->
-<!--      </div>-->
+
+<!--      在整个div左下角的位置有个小灰框就是这个东西 其实应该改一下的 在图片未正常加载的时候也应该有个正常的占位 但是懒得改了-->
       <div>
         <el-image :src="linregress_img"/>
       </div>
@@ -43,15 +43,54 @@ title: 导航2-1
 <script setup lang="ts">
 import { UploadFilled } from '@element-plus/icons-vue'
 import api from "@/api";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
+import { ref } from 'vue'
 
-const file_name = ref('1')
-const linregress_img = ref('')
+const file_name = ref('')
+const linregress_img = ref(null)
 
 const success = (name) =>{
   ElMessage({
     message:`${name}文件上传成功`,
     type:'success'
+  })
+}
+
+// 删除文件后的处理
+const set_zero = () => {
+  linregress_img.value = null
+  ElMessage({
+    type: 'success',
+    message: '文件删除成功'
+  })
+}
+
+// http返回响应如果是500的话可能是文件列名有错误
+const http_fail = (response) =>{
+  ElMessage({
+    type: 'error',
+    message:`${response}`
+  })
+}
+
+// 文件类型检验
+const fail = () =>{
+  ElMessageBox.alert('都说了仅支持xls和xlsx文件类型，怎么就不听呢','警告',{
+    confirmButtonText:'好的，我知道了',
+    callback:()=>{
+      ElMessage({
+        type:'warning',
+        message:'你最好是真的长记性了'
+      })
+    }
+  })
+}
+
+// 单次仅允许提交单个文件的处理
+const handleExceed = () =>{
+  ElMessage({
+    type: 'warning',
+    message:'一次只能提交一个文件哦 请将上一个上传的文件删除'
   })
 }
 
@@ -68,29 +107,23 @@ const uploadFile = (options: any) => {
     }
   })
     .then(response => {
-      file_name.value = response.data.upload_data
-      success(file_name.value)
+      if (response.status === 1) {
+        if (response.data.status === 0) {
+          // 可以在这里处理成功后的逻辑，比如显示成功提示
+          file_name.value = response.data.upload_data
+          success(file_name.value)
+          linregress_img.value = response.data.img_data
+        }else if(response.data.status === 1) {
+          fail()
+        }
+      }else {
+        http_fail(response.status)
+      }
 
-      linregress_img.value = response.data.img_data
-
-      // 可以在这里处理成功后的逻辑，比如显示成功提示
     })
-
-    //没写完 对文件类型错误 数据解析方向的错误进行展示
-
     .catch(error => {
       console.error('文件上传失败:', error)
       // 可以在这里处理失败后的逻辑，比如显示错误提示
     })
 }
-
-// 图片测试
-// const pictureTest = () => {
-//   api.get('/pictureTest')
-//     .then(response => {
-//       console.log(response)
-//       test.value =response.data.upload_data
-//     })
-// }
-
 </script>
