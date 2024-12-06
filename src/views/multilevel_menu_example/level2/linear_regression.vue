@@ -37,6 +37,14 @@ title: 导航2-1
       <div>
         <el-image :src="linregress_img"/>
       </div>
+      <div v-if="linregress_img">
+        <el-row>
+          您的文件中拥有{{row_number}}行数据
+        </el-row>
+        <el-row>
+          通过线性回归预测您的第{{row_number+1}}行数据应该为{{predict_data}}
+        </el-row>
+      </div>
     </PageMain>
   </div>
 </template>
@@ -46,8 +54,11 @@ import api from "@/api";
 import {ElMessage, ElMessageBox} from "element-plus";
 import { ref } from 'vue'
 
+const row_number = ref('')
 const file_name = ref('')
+const predict_data = ref('')
 const linregress_img = ref(null)
+
 
 const success = (name) =>{
   ElMessage({
@@ -113,6 +124,8 @@ const uploadFile = (options: any) => {
           file_name.value = response.data.upload_data
           success(file_name.value)
           linregress_img.value = response.data.img_data
+          row_number.value = response.data.excel_row
+          predict_data.value = response.data.predict_data
         }else if(response.data.status === 1) {
           fail()
         }
