@@ -1,17 +1,17 @@
 <route lang="yaml">
 meta:
-  title: 导航2-1
+title: 导航2-1
 </route>
 
 <template>
   <div>
 
-    <PageHeader>
-      线性分类
-    </PageHeader>
+    <page-header>
+      线性回归
+    </page-header>
 
     <PageMain>
- <!--      拖入文件上传部分 (有爆红但是代码没问题)-->
+<!--      拖入文件上传部分 (有爆红但是代码没问题)-->
       <el-upload
         class="upload-demo"
         :limit= '1'
@@ -33,12 +33,17 @@ meta:
         </template>
       </el-upload>
 
+<!--      在整个div左下角的位置有个小灰框就是这个东西 其实应该改一下的 在图片未正常加载的时候也应该有个正常的占位 但是懒得改了-->
       <div>
-        <el-image :src="train_img"/>
+        <el-image :src="linregress_img"/>
       </div>
-
-      <div>
-        <el-image :src="test_img"/>
+      <div v-if="linregress_img">
+        <el-row>
+          您的文件中拥有{{row_number}}行数据
+        </el-row>
+        <el-row>
+          通过线性回归预测您的第{{row_number+1}}行数据应该为{{predict_data}}
+        </el-row>
       </div>
     </PageMain>
   </div>
@@ -46,21 +51,14 @@ meta:
 <script setup lang="ts">
 import { UploadFilled } from '@element-plus/icons-vue'
 import api from "@/api";
-import {ElMessage, ElMessageBox} from "element-plus";
+import {ElMessage} from "element-plus";
 import { ref } from 'vue'
 
-const upload_data = ref('')
+const row_number = ref('')
+const file_name = ref('')
+const predict_data = ref('')
 const linregress_img = ref(null)
-const train_img = ref(null)
-const test_img = ref(null)
 
-// http返回响应如果是500的话可能是文件列名有错误
-const http_fail = (response) =>{
-  ElMessage({
-    type: 'error',
-    message:`${response}`
-  })
-}
 
 const success = (name) =>{
   ElMessage({
@@ -69,23 +67,12 @@ const success = (name) =>{
   })
 }
 
+// 删除文件后的处理
 const set_zero = () => {
   linregress_img.value = null
   ElMessage({
     type: 'success',
     message: '文件删除成功'
-  })
-}
-
-const fail = () =>{
-  ElMessageBox.alert('都说了仅支持xls和xlsx文件类型，怎么就不听呢','警告',{
-    confirmButtonText:'好的，我知道了',
-    callback:()=>{
-      ElMessage({
-        type:'warning',
-        message:'你最好是真的长记性了'
-      })
-    }
   })
 }
 
@@ -104,27 +91,18 @@ const uploadFile = (options: any) => {
   formData.append('file', file)
 
   // 这里其实最好做成异步处理 因为图片上传 和后端图片返回响应是两步操作 但是暂时偷懒没做那么全
-  api.post('/linear/classification', formData, {
+  api.post('/linear/regression', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
   })
     .then(response => {
-      if (response.status === 1) {
-        if (response.data.status === 0) {
           // 可以在这里处理成功后的逻辑，比如显示成功提示
-          upload_data.value = response.data.upload_data
-          success(upload_data.value)
-          train_img.value = response.data.train_img_data
-          test_img.value = response.data.test_img_data
-
-        }else if(response.data.status === 1) {
-          fail()
-        }
-      }else {
-        http_fail(response.status)
-      }
-
+          file_name.value = response.data.upload_data
+          success(file_name.value)
+          linregress_img.value = response.data.img_data
+          row_number.value = response.data.excel_row
+          predict_data.value = response.data.predict_data
     })
     .catch(error => {
       console.error('文件上传失败:', error)
